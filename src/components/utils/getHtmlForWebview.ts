@@ -7,6 +7,7 @@ export default function getHtmlForWebview(fileContent?: string): string {
       <meta charset="UTF-8">
       <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
       <title>VSCodeReader</title>
+      <script type="text/javascript" language="JavaScript" src="https://www.seabreezecomputers.com/tips/find5.js"></script>
       <style>
         html, body {
           width: 100%;
@@ -21,19 +22,21 @@ export default function getHtmlForWebview(fileContent?: string): string {
           margin-left: -5px;
           transition: opacity 0.3s;
         }
-        #scrollToPositionInput {
-          width: 50px
+        #urlInput {
+          width: 100%;
         }
       </style>
     </head>
     <body>
       <div class="button" id="button">
+        <div>
+          <input type="text" id="urlInput" placeholder="URL">
+        </div>
         <button id="increaseFontSizeButton">+</button>
         <button id="decreaseFontSizeButton">-</button>
         <button id="openButton">open</button>
         <button id="getPositionButton">get</button>
         <button id="savePositionButton">save</button>
-        <input type="text" id="scrollToPositionInput" placeholder="to"/>
       </div>
       <div id="contentContainer">
         <div id="content">${content}</div>
@@ -43,6 +46,43 @@ export default function getHtmlForWebview(fileContent?: string): string {
         let scrollPosition = window.scrollY;
         const button = document.getElementById('button');
         const contentTag = '${content.slice(100, 110).replace(/[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]/g, '')}';
+        window.addEventListener('DOMContentLoaded', () => {
+          const findWindow = document.getElementById('findwindow');
+          findWindow.style.border = 'none';
+          const findButton = findWindow.nextElementSibling;
+          findButton.value = 'find';
+          button.appendChild(findButton);
+
+          const divElements = Array.from(findWindow.getElementsByTagName('div'));
+
+          divElements[0].style.border = "none";
+          divElements[0].style.color = "black";
+          divElements[0].style.backgroundColor = "transparent";
+
+          divElements[1].style.border = "none";
+          divElements[1].style.backgroundColor = "transparent";
+        });
+
+        document.getElementById('urlInput').addEventListener('keyup', event => {
+          if (event.target.value === '') {
+            var iframe = document.querySelector('iframe');
+            if (iframe) {
+              iframe.remove();
+            }
+            return;
+          }
+
+          var iframe = document.querySelector('iframe');
+          if (iframe) {
+            iframe.src = event.target.value;
+          } else {
+            var newIframe = document.createElement('iframe');
+            newIframe.src = event.target.value;
+            newIframe.width = '100%';
+            newIframe.height = '100%';
+            document.body.appendChild(newIframe);
+          }
+        })
 
         document.getElementById('increaseFontSizeButton').addEventListener('click', () => {
           changeFontSize(2);
@@ -71,18 +111,6 @@ export default function getHtmlForWebview(fileContent?: string): string {
         document.getElementById('savePositionButton').addEventListener('click', () => {
           const position = { contentTag: window.scrollY};
           vscode.setState(position)
-        });
-
-        document.getElementById('scrollToPositionInput').addEventListener('keydown', event => {
-          if (event.key === 'Enter') {
-            const value = event.target.value;
-            if (!isNaN(value)) {
-              const position = parseInt(value);
-              window.scrollTo(0, position);
-            } else {
-              event.target.value = ''
-            }
-          }
         });
 
         window.onload = () => {

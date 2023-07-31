@@ -2,7 +2,7 @@
   "name": "VSCodeReader",
   "displayName": "VSCodeReader",
   "description": "VSCodeReader",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "engines": {
     "vscode": "^1.80.0"
   },
