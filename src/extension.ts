@@ -1,10 +1,11 @@
-import { window,commands,ExtensionContext } from 'vscode';
+import { window, commands, ExtensionContext, Uri } from 'vscode';
 import ReaderViewProvider from './components/readerView';
 
 export function activate(context: ExtensionContext) {
-  const readerViewProvider = new ReaderViewProvider();
+  const readerViewProvider = new ReaderViewProvider(context);
+
   window.registerWebviewViewProvider(
-    'VSCodeReader.readerView',
+    ReaderViewProvider.viewType,
     readerViewProvider,
     {
       webviewOptions: {
@@ -12,6 +13,7 @@ export function activate(context: ExtensionContext) {
       }
     }
   );
+
   context.subscriptions.push(
     commands.registerCommand('extension.openFile', async () => {
       try {
@@ -20,11 +22,12 @@ export function activate(context: ExtensionContext) {
           canSelectFolders: false,
           openLabel: 'Open File'
         });
+
         if (fileUri && fileUri[0]) {
           const filePath = fileUri[0].fsPath;
           readerViewProvider.readFile(filePath);
         }
-      } catch (error:any) {
+      } catch (error: any) {
         window.showErrorMessage(`Failed to open file: ${error.message}`);
       }
     })

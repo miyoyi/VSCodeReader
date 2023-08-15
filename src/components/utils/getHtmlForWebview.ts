@@ -130,6 +130,14 @@ export default function getHtmlForWebview(fileContent?: string): string {
           }
           scrollPosition = window.scrollY;
         });
+
+        window.addEventListener('keydown', e => {
+          if(e.keyCode === 87) {
+            window.scrollBy(0,-70);
+          } else if (e.keyCode === 83) {
+            window.scrollBy(0,70);
+          }
+        });
       </script>
     </body>
     </html>`;

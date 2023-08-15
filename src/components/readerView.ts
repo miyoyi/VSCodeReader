@@ -4,26 +4,26 @@ import {
   WebviewView,
   ProgressLocation,
   WebviewViewProvider,
+  Webview,
+  ExtensionContext,
+  ViewColumn
 } from 'vscode';
 import * as fs from 'fs';
-
-import chardet from 'chardet';
+import * as chardet from 'chardet';
 import * as iconv from 'iconv-lite';
 import * as mammoth from 'mammoth';
-
 import getHtmlForWebview from './utils/getHtmlForWebview';
 
 export default class ReaderViewProvider implements WebviewViewProvider {
 
   public static readonly viewType = 'VSCodeReader.readerView';
 
-  private _view ? : WebviewView;
-
+  private _view?: WebviewView;
   private _isLoading: boolean = false;
 
-  public resolveWebviewView(
-    webviewView: WebviewView
-  ) {
+  constructor(private context: ExtensionContext) {}
+
+  public resolveWebviewView(webviewView: WebviewView) {
     this._view = webviewView;
 
     this._view.webview.options = {
@@ -37,13 +37,17 @@ export default class ReaderViewProvider implements WebviewViewProvider {
           await this.readFile(filePath);
           break;
         case 'openCommand':
-          if (this._isLoading) {return;}
+          if (this._isLoading) { return; }
           commands.executeCommand('extension.openFile');
           break;
         default:
           break;
       }
     });
+    const lastOpenedFile = this.context.workspaceState.get<string>('lastOpenedFile');
+    if (lastOpenedFile) {
+      this.readFile(lastOpenedFile);
+    }
 
     const htmlContent = getHtmlForWebview();
     this.updateWebview(htmlContent);
@@ -51,15 +55,16 @@ export default class ReaderViewProvider implements WebviewViewProvider {
 
   public async readFile(filePath: string) {
     this._isLoading = true;
-    void window.withProgress({
+    await window.withProgress({
       location: ProgressLocation.Notification,
-      title: '正在读取文件...',
+      title: 'Reading file...',
       cancellable: true,
-    }, async () => {
+    }, async (progress, token) => {
       try {
         const buffer = await fs.promises.readFile(filePath);
         const isDocFile = /\.(docx)$/i.test(filePath);
-        let fileContent;
+        let fileContent: string;
+
         if (isDocFile) {
           const options = { buffer: buffer };
           const encode = await mammoth.extractRawText(options);
@@ -68,11 +73,15 @@ export default class ReaderViewProvider implements WebviewViewProvider {
           const encode = chardet.detect(buffer) as string;
           fileContent = iconv.decode(buffer, encode);
         }
+
         const htmlContent = getHtmlForWebview(fileContent);
         this.updateWebview(htmlContent);
-        window.showInformationMessage('VSCodeReader 打开成功');
+        window.showInformationMessage('VSCodeReader opened successfully');
+
+        // 保存最后打开的文件路径
+        this.context.workspaceState.update('lastOpenedFile', filePath);
       } catch (error: any) {
-        window.showErrorMessage(`VSCodeReader 打开失败: ${error.message}`);
+        window.showErrorMessage(`Failed to open file: ${error.message}`);
       } finally {
         setTimeout(() => {
           this._isLoading = false;
@@ -82,6 +91,8 @@ export default class ReaderViewProvider implements WebviewViewProvider {
   }
 
   public updateWebview(htmlContent: string) {
-    if (this._view) {this._view.webview.html = htmlContent;}
+    if (this._view) {
+      this._view.webview.html = htmlContent;
+    }
   }
 }
