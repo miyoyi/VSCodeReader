@@ -2,7 +2,7 @@
   "name": "VSCodeReader",
   "displayName": "VSCodeReader",
   "description": "VSCodeReader",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "engines": {
     "vscode": "^1.80.0"
   },
@@ -19,7 +19,7 @@
   ],
   "icon": "assets/Logo.png",
   "activationEvents": [
-    "*"
+    "onView:sidebar"
   ],
   "repository": {
     "type": "git",

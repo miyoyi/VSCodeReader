@@ -1,5 +1,7 @@
 # A sidebar reading plugin
-<<<<<<< HEAD
+w - up
+s - down
+a - turn left
+d - turn right
+space - hide
 ![示例图片](example.png)
-=======
->>>>>>> 443007660c9d8a6610c3e59868611cc04f9f698f
