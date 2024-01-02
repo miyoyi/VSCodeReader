@@ -64,7 +64,7 @@
             divElements[0].style.border = "none";
             divElements[0].style.color = "black";
             divElements[0].style.backgroundColor = "transparent";
-
+            
             divElements[1].style.border = "none";
             divElements[1].style.backgroundColor = "transparent";
           });
@@ -109,14 +109,21 @@
           });
 
           document.getElementById('getPositionButton').addEventListener('click', () => {
-            const position = vscode.getState().contentTag;
-            window.scrollTo(currentX, position);
+            get();
           });
 
           document.getElementById('savePositionButton').addEventListener('click', () => {
+            save();
+          });
+
+          const save = () => {
             const position = { contentTag: window.scrollY};
             vscode.setState(position);
-          });
+          }
+          const get = () => {
+            const position = vscode.getState().contentTag;
+            window.scrollTo(window.scrollX, position);
+          }
 
           window.onload = () => {
             const position = vscode.getState().contentTag;
@@ -144,11 +151,17 @@
               case 68:
                 window.scrollBy(5, currentY);
                 break;
+              case 69:
+                save();
+                break;
+              case 81:
+                get();
+                break;
               case 87:
-                window.scrollBy(currentX, -window.innerHeight);
+                window.scrollBy(currentX, -window.innerHeight * 0.9);
                 break;
               case 83:
-                window.scrollBy(currentX, window.innerHeight);
+                window.scrollBy(currentX, window.innerHeight * 0.9);
                 break;
               case 32:
                 e.preventDefault();
