@@ -51,7 +51,7 @@
           const button = document.getElementById('button');
           const content = document.getElementById('content');
           const contentContainer = document.getElementById('contentContainer');
-          const contentTag = '${content.slice(100, 110).replace(/[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]/g, '')}';
+          const contentTag = 0;
           window.addEventListener('DOMContentLoaded', () => {
             const findWindow = document.getElementById('findwindow');
             findWindow.style.border = 'none';
@@ -124,6 +124,13 @@
             const position = vscode.getState().contentTag;
             window.scrollTo(window.scrollX, position);
           }
+          const toHide = () => {
+            if (+contentContainer.style.opacity) {
+              contentContainer.style.setProperty('opacity', '0');
+            } else {
+              contentContainer.style.setProperty('opacity', '1');
+            }
+          }
 
           window.onload = () => {
             const position = vscode.getState().contentTag;
@@ -133,7 +140,9 @@
             const position = { contentTag: window.scrollY};
             vscode.setState(position);
           };
-
+          window.addEventListener('dblclick', () => {
+            toHide();
+          });
           window.addEventListener('scroll', () => {
             if (window.scrollY > scrollPosition + 10) {
               button.style.opacity = '0';
@@ -165,11 +174,7 @@
                 break;
               case 32:
                 e.preventDefault();
-                if (+contentContainer.style.opacity) {
-                  contentContainer.style.setProperty('opacity', '0');
-                } else {
-                  contentContainer.style.setProperty('opacity', '1');
-                }
+                toHide();
                 break;
               default:
                 break;
